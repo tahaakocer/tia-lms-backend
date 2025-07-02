@@ -33,6 +33,11 @@ public class BaseEntity {
     @LastModifiedBy
     private String lastModifiedBy;
 
-    private boolean activeStatus = true;
+    private boolean activeStatus;
 
+    @PrePersist
+    public void prePersist() {
+
+        activeStatus = true;
+    }
 }

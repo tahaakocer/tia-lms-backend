@@ -20,6 +20,19 @@ public class GeneralExceptionHandler {
     private static final Logger log = LoggerFactory.getLogger(GeneralExceptionHandler.class);
 
     /**
+     * EntityAlreadyExistsException
+     * */
+    @ExceptionHandler(EntityAlreadyExistsException.class)
+    public ResponseEntity<GeneralResponse<?>> handleEntityAlreadyExistsException(EntityAlreadyExistsException ex) {
+        GeneralResponse<?> errorResponse = GeneralResponse.builder()
+                .code(HttpStatus.CONFLICT.value())
+                .message(ex.getMessage())
+                .data(null)
+                .build();
+        log.error("{}:{}", errorResponse.getMessage(), ex.getMessage());
+        return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
+    }
+    /**
      * Validasyon hatalarını yakalayıp GeneralResponse formatında döner
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -69,14 +82,43 @@ public class GeneralExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<GeneralResponse<?>> handleGeneralException(Exception ex) {
+//    @ExceptionHandler(Exception.class)
+//    public ResponseEntity<GeneralResponse<?>> handleGeneralException(Exception ex) {
+//        GeneralResponse<?> errorResponse = GeneralResponse.builder()
+//                .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
+//                .message(ex.getMessage())
+//                .data(null)
+//                .build();
+//        log.error("{}:{}", errorResponse.getMessage(), ex.getMessage());
+//        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+//    }
+
+    /**
+     * ENTITY NOT FOUND
+     * */
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<GeneralResponse<?>> handleEntityNotFoundException(EntityNotFoundException ex) {
         GeneralResponse<?> errorResponse = GeneralResponse.builder()
-                .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .code(HttpStatus.NOT_FOUND.value())
                 .message(ex.getMessage())
                 .data(null)
                 .build();
         log.error("{}:{}", errorResponse.getMessage(), ex.getMessage());
-        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }
+    /**
+     * EntityAlreadyExistsException
+     * */
+//    @ExceptionHandler(EntityAlreadyExistsException.class)
+//    public ResponseEntity<GeneralResponse<?>> handleEntityAlreadyExistsException(EntityAlreadyExistsException ex) {
+//        GeneralResponse<?> errorResponse = GeneralResponse.builder()
+//                .code(HttpStatus.CONFLICT.value())
+//                .message(ex.getMessage())
+//                .data(null)
+//                .build();
+//        log.error("{}:{}", errorResponse.getMessage(), ex.getMessage());
+//        return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
+//    }
+
 }
