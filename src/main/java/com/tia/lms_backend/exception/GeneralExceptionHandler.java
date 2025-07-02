@@ -1,7 +1,7 @@
 package com.tia.lms_backend.exception;
 
 
-import com.tia.lms_backend.dto.GeneralResponse;
+import com.tia.lms_backend.dto.response.GeneralResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;

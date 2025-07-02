@@ -1,9 +1,10 @@
 package com.tia.lms_backend.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 @Getter
@@ -15,5 +16,5 @@ import lombok.experimental.SuperBuilder;
 public class CourseContentDto extends BaseDto {
 
     private String name;
-
+//    private CourseDto course;
 }

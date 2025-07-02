@@ -14,5 +14,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class RoleDto extends BaseDto{
+    private String name;
+
     private String description;
 }

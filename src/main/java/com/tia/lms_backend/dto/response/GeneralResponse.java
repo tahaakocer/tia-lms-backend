@@ -1,4 +1,4 @@
-package com.tia.lms_backend.dto;
+package com.tia.lms_backend.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
