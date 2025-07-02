@@ -81,5 +81,28 @@ public class EmployeeController {
                 .data(employees)
                 .build());
     }
+    @PostMapping("/assign-to-team")
+    public ResponseEntity<GeneralResponse<UserDto>> assignToTeam(
+            @RequestParam UUID userId,
+            @RequestParam UUID teamId
+    ) {
+        UserDto assignedUser = employeeService.assignEmployeeToTeam(userId, teamId);
+        return ResponseEntity.ok(GeneralResponse.<UserDto>builder()
+                .code(200)
+                .message("User assigned to team successfully.")
+                .data(assignedUser)
+                .build());
+    }
+    @PostMapping("/remove-from-team")
+    public ResponseEntity<GeneralResponse<UserDto>> removeFromTeam(
+            @RequestParam UUID userId
+    ) {
+        UserDto updatedUser = employeeService.removeEmployeeFromTeam(userId);
+        return ResponseEntity.ok(GeneralResponse.<UserDto>builder()
+                .code(200)
+                .message("User removed from team successfully.")
+                .data(updatedUser)
+                .build());
+    }
 
 }

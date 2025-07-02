@@ -1,11 +1,14 @@
 package com.tia.lms_backend.service;
 
 import com.tia.lms_backend.dto.TeamDto;
+import com.tia.lms_backend.dto.TeamWithMembersDto;
+import com.tia.lms_backend.dto.UserDto;
 import com.tia.lms_backend.dto.response.GeneralResponse;
 import com.tia.lms_backend.exception.EntityAlreadyExistsException;
 import com.tia.lms_backend.exception.EntityNotFoundException;
 import com.tia.lms_backend.exception.GeneralException;
 import com.tia.lms_backend.mapper.TeamMapper;
+import com.tia.lms_backend.mapper.UserMapper;
 import com.tia.lms_backend.model.Department;
 import com.tia.lms_backend.model.Team;
 import com.tia.lms_backend.model.User;
@@ -24,13 +27,17 @@ public class TeamService {
     private final TeamMapper teamMapper;
     private final EmployeeService employeeService;
     private final KeycloakService keycloakService;
+    private final UserRepository userRepository;
+    private final UserMapper userMapper;
 
-    public TeamService(TeamRepository teamRepository, TeamMapper teamMapper, EmployeeService employeeService, KeycloakService keycloakService) {
+    public TeamService(TeamRepository teamRepository, TeamMapper teamMapper, EmployeeService employeeService, KeycloakService keycloakService, UserRepository userRepository, UserMapper userMapper) {
         this.teamRepository = teamRepository;
         this.teamMapper = teamMapper;
 
         this.employeeService = employeeService;
         this.keycloakService = keycloakService;
+        this.userRepository = userRepository;
+        this.userMapper = userMapper;
     }
 
     public TeamDto createTeam(String name, String leadId) {
@@ -128,4 +135,41 @@ public class TeamService {
         log.info("Teams fetched successfully: {}", teams);
         return teams;
     }
+    public TeamWithMembersDto getTeamWithMembersById(UUID teamId) {
+        log.info("Fetching team with members by id: {}", teamId);
+
+        Team team = teamRepository.findById(teamId)
+                .orElseThrow(() -> new EntityNotFoundException("Team not found with id: " + teamId));
+
+        List<User> members = userRepository.findAllByTeam(team);
+        List<UserDto> memberDtos = members.stream()
+                .map(this.userMapper::entityToDto)
+                .toList();
+
+        return TeamWithMembersDto.builder()
+                .id(team.getId())
+                .name(team.getName())
+                .leadId(team.getLeadId())
+                .members(memberDtos)
+                .build();
+    }
+    public TeamWithMembersDto getTeamWithMembersByName(String name) {
+        log.info("Fetching team with members by name: {}", name);
+
+        Team team = teamRepository.findByName(name)
+                .orElseThrow(() -> new EntityNotFoundException("Team not found with name: " + name));
+
+        List<User> members = userRepository.findAllByTeam(team);
+        List<UserDto> memberDtos = members.stream()
+                .map(this.userMapper::entityToDto)
+                .toList();
+
+        return TeamWithMembersDto.builder()
+                .id(team.getId())
+                .name(team.getName())
+                .leadId(team.getLeadId())
+                .members(memberDtos)
+                .build();
+    }
+
 }

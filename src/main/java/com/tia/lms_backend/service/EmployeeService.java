@@ -18,6 +18,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -186,6 +187,57 @@ public class EmployeeService {
         return userRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + id));
     }
+    public UserDto assignEmployeeToTeam(UUID userId, UUID teamId) {
+        log.info("Assigning user with id {} to team with id {}", userId, teamId);
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
+
+        Team team = teamRepository.findById(teamId)
+                .orElseThrow(() -> new EntityNotFoundException("Team not found with id: " + teamId));
+
+        if (user.getTeam() != null && user.getTeam().getId().equals(team.getId())) {
+            log.error("User with id {} is already assigned to team with id {}", userId, teamId);
+            throw new EntityAlreadyExistsException("User is already assigned to this team");
+        }
+
+        user.setTeam(team);
+
+        Role employeeRole = roleRepository.findByName("EMPLOYEE")
+                .orElseThrow(() -> new EntityNotFoundException("Role not found with name: EMPLOYEE"));
+        user.setRole(employeeRole);
+
+        User updatedUser = saveEntity(user);
+        log.info("User with id {} successfully assigned to team with id {}", userId, teamId);
+
+        return userMapper.entityToDto(updatedUser);
+    }
+    public UserDto removeEmployeeFromTeam(UUID userId) {
+        log.info("Removing user with id {} from their team", userId);
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
+
+        if (user.getTeam() == null) {
+            log.warn("User with id {} is not assigned to any team", userId);
+            throw new EntityNotFoundException("User is not assigned to any team");
+        }
+        if(Objects.equals(user.getId(),user.getTeam().getLeadId())) {
+            log.error("User with id {} is the team lead and cannot be removed from the team", userId);
+            throw new GeneralException("Team lead cannot be removed from the team");
+        }
+        user.setTeam(null);
+
+        Role employeeRole = roleRepository.findByName("EMPLOYEE")
+                .orElseThrow(() -> new EntityNotFoundException("Role not found with name: EMPLOYEE"));
+        user.setRole(employeeRole);
+
+        User updatedUser = saveEntity(user);
+        log.info("User with id {} successfully removed from team", userId);
+
+        return userMapper.entityToDto(updatedUser);
+    }
+
     private User saveEntity(User user) {
         try {
             validateUser(user);

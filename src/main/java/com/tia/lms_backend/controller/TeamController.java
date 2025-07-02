@@ -1,6 +1,7 @@
 package com.tia.lms_backend.controller;
 
 import com.tia.lms_backend.dto.TeamDto;
+import com.tia.lms_backend.dto.TeamWithMembersDto;
 import com.tia.lms_backend.dto.response.GeneralResponse;
 import com.tia.lms_backend.model.Team;
 import com.tia.lms_backend.service.TeamService;
@@ -55,6 +56,29 @@ public class TeamController {
     }
     //TODO : id veya name ile takım getirildiğinde takıma ait çalışanları da response'a yerleştir
     // ( tek taraflı ilişki kurulduğu için userRepoyu team servise çekip orada yerleştir)
+    @GetMapping("/{id}/with-members")
+    public ResponseEntity<GeneralResponse<TeamWithMembersDto>> getTeamWithMembersById(@PathVariable String id) {
+        TeamWithMembersDto dto = teamService.getTeamWithMembersById(UUID.fromString(id));
+        return ResponseEntity.ok(
+                GeneralResponse.<TeamWithMembersDto>builder()
+                        .code(200)
+                        .message("Team with members fetched successfully")
+                        .data(dto)
+                        .build()
+        );
+    }
+
+    @GetMapping("/get-by-name/with-members")
+    public ResponseEntity<GeneralResponse<TeamWithMembersDto>> getTeamWithMembersByName(@RequestParam String name) {
+        TeamWithMembersDto dto = teamService.getTeamWithMembersByName(name);
+        return ResponseEntity.ok(
+                GeneralResponse.<TeamWithMembersDto>builder()
+                        .code(200)
+                        .message("Team with members fetched successfully")
+                        .data(dto)
+                        .build()
+        );
+    }
 
     @GetMapping("/get-by-lead")
     public ResponseEntity<GeneralResponse<TeamDto>> getTeamByLead(@RequestParam String leadId) {
