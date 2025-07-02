@@ -20,6 +20,25 @@ spring:
     redis:
       host: ${REDIS_HOST}
       port: ${REDIS_PORT}
+  http:
+    multipart:
+      enabled: true
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    protocol: smtp
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
   security:
     oauth2:
       resourceserver:
@@ -35,8 +54,8 @@ jwt:
 keycloak:
   client-id: ${CLIENT_ID}
   client-secret: ${CLIENT_SECRET}
-  admin-username: ${ADMIN_USER_ID}
-  admin-password: ${ADMIN_USER_PASSWORD}
+  admin-username: ${IDM_USERNAME}
+  admin-password: ${IDM_PASSWORD}
   username: ${IDM_USERNAME}
   password: ${IDM_PASSWORD}
   realm: ${REALM}

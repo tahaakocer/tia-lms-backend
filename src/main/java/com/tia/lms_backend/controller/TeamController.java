@@ -1,0 +1,79 @@
+package com.tia.lms_backend.controller;
+
+import com.tia.lms_backend.dto.TeamDto;
+import com.tia.lms_backend.dto.response.GeneralResponse;
+import com.tia.lms_backend.model.Team;
+import com.tia.lms_backend.service.TeamService;
+import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.UUID;
+
+@RestController
+@RequestMapping("/api/teams")
+public class TeamController {
+    private final TeamService teamService;
+
+    public TeamController(TeamService teamService) {
+        this.teamService = teamService;
+    }
+
+    @PostMapping
+    public ResponseEntity<GeneralResponse<TeamDto>> createTeam(
+            @RequestParam String name, @RequestParam String leadId
+    ) {
+        TeamDto teamDto = teamService.createTeam(name, leadId);
+        GeneralResponse<TeamDto> response = GeneralResponse.<TeamDto>builder()
+                .code(201)
+                .message("Team created successfully")
+                .data(teamDto)
+                .build();
+        return ResponseEntity.status(201).body(response);
+
+    }
+    @GetMapping("/{id}")
+    public ResponseEntity<GeneralResponse<TeamDto>> getTeamById(@PathVariable String id) {
+        TeamDto teamDto = teamService.getById(UUID.fromString(id));
+        GeneralResponse<TeamDto> response = GeneralResponse.<TeamDto>builder()
+                .code(200)
+                .message("Team fetched successfully")
+                .data(teamDto)
+                .build();
+        return ResponseEntity.ok(response);
+    }
+    @GetMapping("/get-by-name")
+    public ResponseEntity<GeneralResponse<TeamDto>> getTeamByName(@RequestParam String name) {
+        TeamDto teamDto = teamService.getByName(name);
+        GeneralResponse<TeamDto> response = GeneralResponse.<TeamDto>builder()
+                .code(200)
+                .message("Team fetched successfully")
+                .data(teamDto)
+                .build();
+        return ResponseEntity.ok(response);
+    }
+    //TODO : id veya name ile takım getirildiğinde takıma ait çalışanları da response'a yerleştir
+    // ( tek taraflı ilişki kurulduğu için userRepoyu team servise çekip orada yerleştir)
+
+    @GetMapping("/get-by-lead")
+    public ResponseEntity<GeneralResponse<TeamDto>> getTeamByLead(@RequestParam String leadId) {
+        TeamDto teamDto = teamService.getByLead(leadId);
+        GeneralResponse<TeamDto> response = GeneralResponse.<TeamDto>builder()
+                .code(200)
+                .message("Team fetched successfully")
+                .data(teamDto)
+                .build();
+        return ResponseEntity.ok(response);
+    }
+    @GetMapping
+    public ResponseEntity<GeneralResponse<List<Team>>> getAllTeams() {
+        List<Team> teams = teamService.getAll();
+        GeneralResponse<List<Team>> response = GeneralResponse.<List<Team>>builder()
+                .code(200)
+                .message("Teams fetched successfully")
+                .data(teams)
+                .build();
+        return ResponseEntity.ok(response);
+    }
+}
