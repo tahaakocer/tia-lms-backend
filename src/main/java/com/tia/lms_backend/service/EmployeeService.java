@@ -29,19 +29,21 @@ public class EmployeeService {
     private final DepartmentRepository departmentRepository;
     private final RoleRepository roleRepository;
     private final UserMapper userMapper;
+    private final AwsS3Service awsS3Service;
 
     public EmployeeService(KeycloakService keycloakService,
                            UserRepository userRepository,
                            TeamRepository teamRepository,
                            DepartmentRepository departmentRepository,
                            RoleRepository roleRepository,
-                           UserMapper userMapper) {
+                           UserMapper userMapper, AwsS3Service awsS3Service) {
         this.keycloakService = keycloakService;
         this.userRepository = userRepository;
         this.teamRepository = teamRepository;
         this.departmentRepository = departmentRepository;
         this.roleRepository = roleRepository;
         this.userMapper = userMapper;
+        this.awsS3Service = awsS3Service;
     }
     public UserDto registerEmployee(CreateEmployeeRequest request) {
         log.info("Registering employee with request: {}", request);
@@ -74,6 +76,8 @@ public class EmployeeService {
         }
         String keycloakId = keycloakService.createKeycloakUser(user.getTckn(),user.getEmail(),null);
         user.setKeycloakId(keycloakId);
+        String imageUrl = this.awsS3Service.uploadProfilePicture(user.getTckn(),request.getProfilePicture());
+        user.setAvatarUrl(imageUrl);
         User savedUser = saveEntity(user);
         return userMapper.entityToDto(savedUser);
     }

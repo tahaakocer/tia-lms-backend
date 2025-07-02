@@ -5,10 +5,7 @@ import com.tia.lms_backend.dto.request.CreateEmployeeRequest;
 import com.tia.lms_backend.dto.response.GeneralResponse;
 import com.tia.lms_backend.service.EmployeeService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/employees")
@@ -22,7 +19,7 @@ public class EmployeeController {
 
     @PostMapping("/create")
     public ResponseEntity<GeneralResponse<UserDto>> createEmployee(
-            @RequestBody CreateEmployeeRequest createEmployeeRequest
+            @ModelAttribute CreateEmployeeRequest createEmployeeRequest
     ) {
         UserDto createdUser = employeeService.registerEmployee(createEmployeeRequest);
         return ResponseEntity.ok(GeneralResponse.<UserDto>builder()

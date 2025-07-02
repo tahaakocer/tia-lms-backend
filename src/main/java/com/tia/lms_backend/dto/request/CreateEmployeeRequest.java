@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
+import org.springframework.web.multipart.MultipartFile;
 
 @Getter
 @Setter
@@ -24,6 +25,7 @@ public class CreateEmployeeRequest {
     private String education;
     private String title;
 
+    private MultipartFile profilePicture;
     private String teamId;
     private String departmentId;
 }

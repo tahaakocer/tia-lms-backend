@@ -107,6 +107,17 @@ public class GeneralExceptionHandler {
         log.error("{}:{}", errorResponse.getMessage(), ex.getMessage());
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }
+    @ExceptionHandler(S3Exception.class)
+    public ResponseEntity<GeneralResponse<?>> handleS3UploadImageException(S3Exception ex) {
+        GeneralResponse<?> errorResponse = GeneralResponse.builder()
+                .code(HttpStatus.NOT_FOUND.value())
+                .message(ex.getMessage())
+                .data(null)
+                .build();
+        log.error("{}:{}", errorResponse.getMessage(), ex.getMessage());
+        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+    }
+
     /**
      * EntityAlreadyExistsException
      * */
