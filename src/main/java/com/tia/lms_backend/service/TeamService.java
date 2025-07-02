@@ -8,7 +8,9 @@ import com.tia.lms_backend.exception.GeneralException;
 import com.tia.lms_backend.mapper.TeamMapper;
 import com.tia.lms_backend.model.Department;
 import com.tia.lms_backend.model.Team;
+import com.tia.lms_backend.model.User;
 import com.tia.lms_backend.repository.TeamRepository;
+import com.tia.lms_backend.repository.UserRepository;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
@@ -20,10 +22,15 @@ import java.util.UUID;
 public class TeamService {
     private final TeamRepository teamRepository;
     private final TeamMapper teamMapper;
+    private final EmployeeService employeeService;
+    private final KeycloakService keycloakService;
 
-    public TeamService(TeamRepository teamRepository, TeamMapper teamMapper) {
+    public TeamService(TeamRepository teamRepository, TeamMapper teamMapper, EmployeeService employeeService, KeycloakService keycloakService) {
         this.teamRepository = teamRepository;
         this.teamMapper = teamMapper;
+
+        this.employeeService = employeeService;
+        this.keycloakService = keycloakService;
     }
 
     public TeamDto createTeam(String name, String leadId) {
@@ -32,13 +39,24 @@ public class TeamService {
             log.error("Team with name {} already exists", name);
             throw new EntityAlreadyExistsException("Team with this name already exists");
         }
-        //TODO leadId'yi dbde var mı yok mu diye kontrol et
 
+        User user = employeeService.getUserById(UUID.fromString(leadId));
+        if (user.getTeam() != null) {
+            log.error("User with id {} is already assigned to a team", leadId);
+            throw new EntityAlreadyExistsException("User is already assigned to a team");
+        }
+
+        log.info("User with id {} is valid and not assigned to any team", leadId);
        Team team = Team.builder()
                 .name(name)
-                .leadId(UUID.fromString(leadId))
+                .leadId(user.getId())
                .build();
+
+        this.keycloakService.promoteEmployeeToTeamLead(user.getKeycloakId());
         Team savedTeam = saveEntity(team);
+        User changedUser = this.employeeService.promoteToTeamLead(user.getId(), team);
+        log.info("User with id {} has been changed to TEAMLEAD role", changedUser.getId());
+
         return this.teamMapper.entityToDto(savedTeam);
     }
     public TeamDto getByName(String name) {

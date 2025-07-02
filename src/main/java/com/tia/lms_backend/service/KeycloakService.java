@@ -126,4 +126,58 @@ public class KeycloakService {
         }
         return sb.toString();
     }
+    public void promoteEmployeeToTeamLead(String keycloakUserId) {
+        RealmResource realmResource = this.keycloakClient.realm(realm);
+        UserResource userResource = realmResource.users().get(keycloakUserId);
+        RoleMappingResource roleMappingResource = userResource.roles();
+        RoleScopeResource realmRoleScope = roleMappingResource.realmLevel();
+
+        // Mevcut roller
+        List<RoleRepresentation> currentRoles = realmRoleScope.listAll();
+
+        boolean hasEmployeeRole = currentRoles.stream()
+                .anyMatch(role -> "EMPLOYEE".equals(role.getName()));
+
+        if (!hasEmployeeRole) {
+            throw new GeneralException("Kullanıcının EMPLOYEE rolü yok, TEAMLEAD rolüne terfi edemez.");
+        }
+
+        // EMPLOYEE rolünü kaldır
+        RoleRepresentation employeeRole = realmResource.roles().get("EMPLOYEE").toRepresentation();
+        realmRoleScope.remove(List.of(employeeRole));
+
+        // TEAMLEAD rolünü ata
+        RoleRepresentation teamLeadRole = realmResource.roles().get("TEAMLEAD").toRepresentation();
+        realmRoleScope.add(List.of(teamLeadRole));
+
+        log.info("User with id {} has been promoted to Team Lead in Keycloak", keycloakUserId);
+    }
+    public void demoteTeamLeadToEmployee(String keycloakUserId) {
+        RealmResource realmResource = this.keycloakClient.realm(realm);
+        UserResource userResource = realmResource.users().get(keycloakUserId);
+        RoleMappingResource roleMappingResource = userResource.roles();
+        RoleScopeResource realmRoleScope = roleMappingResource.realmLevel();
+
+        // Mevcut roller
+        List<RoleRepresentation> currentRoles = realmRoleScope.listAll();
+
+        boolean hasTeamLeadRole = currentRoles.stream()
+                .anyMatch(role -> "TEAMLEAD".equals(role.getName()));
+
+        if (!hasTeamLeadRole) {
+            throw new GeneralException("Kullanıcının TEAMLEAD rolü yok, EMPLOYEE rolüne düşürülemez.");
+        }
+
+        // TEAMLEAD rolünü kaldır
+        RoleRepresentation teamLeadRole = realmResource.roles().get("TEAMLEAD").toRepresentation();
+        realmRoleScope.remove(List.of(teamLeadRole));
+
+        // EMPLOYEE rolünü ata
+        RoleRepresentation employeeRole = realmResource.roles().get("EMPLOYEE").toRepresentation();
+        realmRoleScope.add(List.of(employeeRole));
+
+        log.info("Kullanıcı {} TEAMLEAD rolünden EMPLOYEE rolüne düşürüldü", keycloakUserId);
+    }
+
+
 }

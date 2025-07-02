@@ -15,14 +15,16 @@ import com.tia.lms_backend.repository.RoleRepository;
 import com.tia.lms_backend.repository.TeamRepository;
 import com.tia.lms_backend.repository.UserRepository;
 import lombok.extern.log4j.Log4j2;
-import org.keycloak.admin.client.Keycloak;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @Log4j2
 public class EmployeeService {
+
     private final KeycloakService keycloakService;
     private final UserRepository userRepository;
     private final TeamRepository teamRepository;
@@ -36,7 +38,8 @@ public class EmployeeService {
                            TeamRepository teamRepository,
                            DepartmentRepository departmentRepository,
                            RoleRepository roleRepository,
-                           UserMapper userMapper, AwsS3Service awsS3Service) {
+                           UserMapper userMapper,
+                           AwsS3Service awsS3Service) {
         this.keycloakService = keycloakService;
         this.userRepository = userRepository;
         this.teamRepository = teamRepository;
@@ -45,18 +48,100 @@ public class EmployeeService {
         this.userMapper = userMapper;
         this.awsS3Service = awsS3Service;
     }
+
     public UserDto registerEmployee(CreateEmployeeRequest request) {
         log.info("Registering employee with request: {}", request);
+        validateRequest(request);
+
+        Department department = getDepartment(request.getDepartmentId());
+        Role role = getEmployeeRole();
+
+        Team team = getTeamIfPresent(request.getTeamId());
+
+        User user = buildUser(request, department, role, team);
+
+        String keycloakId = keycloakService.createKeycloakUser(user.getTckn(), user.getEmail(), null);
+        user.setKeycloakId(keycloakId);
+
+        user.setAvatarUrl(uploadProfilePicture(user.getTckn(), request));
+
+        User savedUser = saveEntity(user);
+
+        return userMapper.entityToDto(savedUser);
+    }
+    public List<UserDto> getAllEmployees() {
+        try {
+            List<User> users = userRepository.findAll();
+            return users.stream()
+                    .map(userMapper::entityToDto)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            log.error("Error fetching all employees", e);
+            throw new GeneralException("Error fetching all employees", e);
+        }
+
+    }
+    public UserDto getEmployeeById(UUID id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + id));
+        return userMapper.entityToDto(user);
+    }
+    public List<UserDto> getEmployeesByRole(String roleName) {
+        Role role = roleRepository.findByName(roleName)
+                .orElseThrow(() -> new EntityNotFoundException("Role not found: " + roleName));
+
+        List<User> users = userRepository.findAllByRole(role);
+        return users.stream()
+                .map(userMapper::entityToDto)
+                .collect(Collectors.toList());
+    }
+    public List<UserDto> getEmployeesByDepartmentId(UUID departmentId) {
+        Department department = departmentRepository.findById(departmentId)
+                .orElseThrow(() -> new EntityNotFoundException("Department not found with id: " + departmentId));
+
+        List<User> users = userRepository.findAllByDepartment(department);
+        return users.stream()
+                .map(userMapper::entityToDto)
+                .collect(Collectors.toList());
+    }
+    public List<UserDto> getEmployeesByTeamId(UUID teamId) {
+        Team team = teamRepository.findById(teamId)
+                .orElseThrow(() -> new EntityNotFoundException("Team not found with id: " + teamId));
+
+        List<User> users = userRepository.findAllByTeam(team);
+        return users.stream()
+                .map(userMapper::entityToDto)
+                .collect(Collectors.toList());
+    }
+    private void validateRequest(CreateEmployeeRequest request) {
         if (request == null) {
             log.error("CreateEmployeeRequest is null");
             throw new EntityNotFoundException("CreateEmployeeRequest cannot be null");
         }
+    }
 
-        Department department = departmentRepository.findById(UUID.fromString(request.getDepartmentId()))
-                .orElseThrow(() -> new EntityNotFoundException("Department not found with id: " + request.getDepartmentId()));
-        Role role = roleRepository.findByName("EMPLOYEE")
+    private Department getDepartment(String departmentId) {
+        return departmentRepository.findById(UUID.fromString(departmentId))
+                .orElseThrow(() -> new EntityNotFoundException("Department not found with id: " + departmentId));
+    }
+
+    private Role getEmployeeRole() {
+        return roleRepository.findByName("EMPLOYEE")
                 .orElseThrow(() -> new EntityNotFoundException("Role not found with name: EMPLOYEE"));
-        User user = User.builder()
+    }
+
+    private Team getTeamIfPresent(String teamId) {
+        if (teamId == null) return null;
+        return teamRepository.findById(UUID.fromString(teamId))
+                .orElseThrow(() -> new EntityNotFoundException("Team not found with id: " + teamId));
+    }
+
+    private String uploadProfilePicture(String tckn, CreateEmployeeRequest request) {
+        return awsS3Service.uploadProfilePicture(tckn, request.getProfilePicture());
+    }
+
+    private User buildUser(CreateEmployeeRequest request, Department department, Role role, Team team) {
+        return User.builder()
                 .name(request.getName())
                 .lastName(request.getLastName())
                 .email(request.getEmail())
@@ -66,35 +151,52 @@ public class EmployeeService {
                 .title(request.getTitle())
                 .department(department)
                 .role(role)
+                .team(team)
                 .build();
-        if(request.getTeamId() != null) {
-            Team team = teamRepository.findById(UUID.fromString(request.getTeamId()))
-                    .orElseThrow(() -> new EntityNotFoundException("Team not found with id: " + request.getTeamId()));
-            user.setTeam(team);
-        } else {
-            user.setTeam(null);
-        }
-        String keycloakId = keycloakService.createKeycloakUser(user.getTckn(),user.getEmail(),null);
-        user.setKeycloakId(keycloakId);
-        String imageUrl = this.awsS3Service.uploadProfilePicture(user.getTckn(),request.getProfilePicture());
-        user.setAvatarUrl(imageUrl);
-        User savedUser = saveEntity(user);
-        return userMapper.entityToDto(savedUser);
     }
+    protected User promoteToTeamLead(UUID userId,Team team) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
 
+        Role newRole = roleRepository.findByName("TEAMLEAD")
+                .orElseThrow(() -> new EntityNotFoundException("Role not found with name: TEAMLEAD"));
 
+        user.setRole(newRole);
+        user.setTeam(team);
+        User updatedUser = saveEntity(user);
+
+        log.info("User role changed successfully: {}", updatedUser);
+        return updatedUser;
+
+    }
+    protected User changeRole(UUID userId, String newRoleName) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
+
+        Role newRole = roleRepository.findByName(newRoleName)
+                .orElseThrow(() -> new EntityNotFoundException("Role not found with name: " + newRoleName));
+
+        user.setRole(newRole);
+        User updatedUser = saveEntity(user);
+
+        log.info("User role changed successfully: {}", updatedUser);
+        return updatedUser;
+    }
+    protected User getUserById(UUID id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + id));
+    }
     private User saveEntity(User user) {
         try {
-            if (user == null || user.getName() == null || user.getTckn().isEmpty()) {
-                log.error("User entity is null");
-                throw new EntityNotFoundException("User entity cannot be null");
-            }
-            if (userRepository.existsByTckn(user.getTckn())) {
-                log.error("User with tckn {} already exists", user.getName());
-                throw new EntityAlreadyExistsException("User with this tckn already exists");
-            } else if (userRepository.existsByEmail(user.getEmail())) {
-                log.error("User with email {} already exists", user.getEmail());
-                throw new EntityAlreadyExistsException("User with this email already exists");
+            validateUser(user);
+
+            if (user.getId() == null) { // SADECE yeni kayıt için kontrol et
+                if (userRepository.existsByTckn(user.getTckn())) {
+                    throw new EntityAlreadyExistsException("User with this tckn already exists");
+                }
+                if (userRepository.existsByEmail(user.getEmail())) {
+                    throw new EntityAlreadyExistsException("User with this email already exists");
+                }
             }
 
             log.info("Saving User: {}", user.getName());
@@ -105,6 +207,14 @@ public class EmployeeService {
         } catch (Exception e) {
             log.error("Unexpected error saving user: {}", user, e);
             throw new GeneralException("Error saving user", e);
+        }
+    }
+
+
+    private void validateUser(User user) {
+        if (user == null || user.getName() == null || user.getTckn() == null || user.getTckn().isEmpty()) {
+            log.error("User entity is invalid");
+            throw new EntityNotFoundException("User entity is invalid");
         }
     }
 }
