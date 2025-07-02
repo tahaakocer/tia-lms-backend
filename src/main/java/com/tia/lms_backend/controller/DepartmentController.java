@@ -3,6 +3,7 @@ package com.tia.lms_backend.controller;
 import com.tia.lms_backend.dto.DepartmentDto;
 import com.tia.lms_backend.dto.response.GeneralResponse;
 import com.tia.lms_backend.service.DepartmentService;
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,10 +20,10 @@ public class DepartmentController {
         this.departmentService = departmentService;
     }
 
-    @PostMapping("/create")
+    @PostMapping
     public ResponseEntity<GeneralResponse<DepartmentDto>> createDepartment(
-            @RequestParam String name,
-            @RequestParam String description
+            @RequestParam @NotBlank String name,
+            @RequestParam(required = false) String description
     ) {
         DepartmentDto departmentDto = this.departmentService.create(name, description);
         return ResponseEntity.ok(GeneralResponse.<DepartmentDto>builder()
@@ -32,9 +33,9 @@ public class DepartmentController {
                 .build());
     }
 
-    @GetMapping("/get-by-id")
+    @GetMapping("/{id}")
     public ResponseEntity<GeneralResponse<DepartmentDto>> getDepartmentById(
-            @RequestParam UUID id
+            @PathVariable UUID id
     ) {
         DepartmentDto departmentDto = this.departmentService.getById(id);
         return ResponseEntity.ok(GeneralResponse.<DepartmentDto>builder()
@@ -56,7 +57,7 @@ public class DepartmentController {
                 .build());
     }
 
-    @GetMapping("/get-all")
+    @GetMapping
     public ResponseEntity<GeneralResponse<List<DepartmentDto>>> getAll() {
         List<DepartmentDto> departmentDtos = this.departmentService.getAll();
         return ResponseEntity.ok(GeneralResponse.<List<DepartmentDto>>builder()

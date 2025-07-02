@@ -19,10 +19,10 @@ public class RoleController {
         this.roleService = roleService;
     }
 
-    @PostMapping("/create")
+    @PostMapping
     public ResponseEntity<GeneralResponse<RoleDto>> createRole(
             @RequestParam String name,
-            @RequestParam String description
+            @RequestParam(required = false) String description
     ) {
         RoleDto roleDto = this.roleService.create(name, description);
         return ResponseEntity.ok(GeneralResponse.<RoleDto>builder()
@@ -31,7 +31,7 @@ public class RoleController {
                 .data(roleDto)
                 .build());
     }
-    @GetMapping("/get-by-id")
+    @GetMapping("/{id}")
     public ResponseEntity<GeneralResponse<RoleDto>> getRoleById(
             @RequestParam UUID id
     ) {
@@ -53,7 +53,7 @@ public class RoleController {
                 .data(roleDto)
                 .build());
     }
-    @GetMapping("/get-all")
+    @GetMapping
     public ResponseEntity<GeneralResponse<List<RoleDto>>> getAll(
     ) {
         List<RoleDto> roleDtos = this.roleService.getAll();
