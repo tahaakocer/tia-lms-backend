@@ -10,7 +10,7 @@ spring:
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
@@ -35,6 +35,8 @@ jwt:
 keycloak:
   client-id: ${CLIENT_ID}
   client-secret: ${CLIENT_SECRET}
+  admin-username: ${ADMIN_USER_ID}
+  admin-password: ${ADMIN_USER_PASSWORD}
   username: ${IDM_USERNAME}
   password: ${IDM_PASSWORD}
   realm: ${REALM}
