@@ -107,10 +107,7 @@ public class CourseService {
     public List<CourseDto> getAll() {
         log.info("Fetching all courses");
         List<Course> courses = courseRepository.findAll();
-        if (courses.isEmpty()) {
-            log.warn("No courses found");
-            throw new EntityNotFoundException("No courses found");
-        }
+
         List<CourseDto> courseDtos = courses.stream()
                 .map(courseMapper::entityToDto)
                 .toList();
