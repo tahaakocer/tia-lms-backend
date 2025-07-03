@@ -1,8 +1,7 @@
 package com.tia.lms_backend.mapper;
 
-import com.tia.lms_backend.dto.EnrollmentCourseContentDto;
-import com.tia.lms_backend.dto.EnrollmentDto;
-import com.tia.lms_backend.dto.UserCourseContentDto;
+import com.tia.lms_backend.dto.*;
+import com.tia.lms_backend.model.CourseContent;
 import com.tia.lms_backend.model.Enrollment;
 import com.tia.lms_backend.model.UserCourseContent;
 import org.mapstruct.Mapper;
@@ -14,4 +13,8 @@ public interface EnrollmentMapper {
     UserCourseContentDto userCourseContentToDto(UserCourseContent ucc);
 
     EnrollmentCourseContentDto userCourseContentToEnrollmentCourseContentDto(UserCourseContent userCourseContent);
+
+    CourseContentDto courseContentToDto(CourseContent content);
+
+    CourseEnrollmentDto entityToCourseEnrollmentDto(Enrollment enrollment);
 }
