@@ -12,7 +12,6 @@ import com.tia.lms_backend.repository.ContactRepository;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 import com.tia.lms_backend.mapper.ContactMapper;
-
 import java.util.List;
 import java.util.UUID;
 
@@ -21,10 +20,12 @@ import java.util.UUID;
 public class ContactService {
     private final ContactRepository contactRepository;
     private final ContactMapper contactMapper;
+    private final EmailService emailService;
 
-    public ContactService(ContactRepository contactRepository,ContactMapper contactMapper){
+    public ContactService(ContactRepository contactRepository, ContactMapper contactMapper, EmailService emailService){
         this.contactRepository = contactRepository;
         this.contactMapper = contactMapper;
+        this.emailService = emailService;
     }
 
     public ContactDto create(CreateContactRequest request) {
@@ -66,6 +67,13 @@ public class ContactService {
                 .orElseThrow(() -> new EntityNotFoundException("Contact not found with id: " + id));
         contact.setContactStatus(status);
         Contact updated = contactRepository.save(contact);
+        // Send email to user
+        emailService.sendContactResponseEmail(
+                contact.getEmail(), // or look up user by userId if needed
+                contact.getName(), // if you want to display name in mail like "Hello + {name}"
+                contact.getContentTitle(), // or course name
+                status.name()
+        );
         return contactMapper.entityToDto(updated);
     }
 
