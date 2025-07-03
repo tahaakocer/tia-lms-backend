@@ -1,6 +1,8 @@
 package com.tia.lms_backend.service;
 
 import com.tia.lms_backend.dto.CourseDto;
+import com.tia.lms_backend.dto.request.CreateCourseRequest;
+import com.tia.lms_backend.dto.request.CreateEmployeeRequest;
 import com.tia.lms_backend.exception.EntityAlreadyExistsException;
 import com.tia.lms_backend.exception.EntityNotFoundException;
 import com.tia.lms_backend.exception.GeneralException;
@@ -11,6 +13,7 @@ import com.tia.lms_backend.repository.CourseCategoryRepository;
 import com.tia.lms_backend.repository.CourseRepository;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.UUID;
@@ -21,35 +24,43 @@ public class CourseService {
     private final CourseRepository courseRepository;
     private final CourseCategoryRepository courseCategoryRepository;
     private final CourseMapper courseMapper;
+    private final AwsS3Service awsS3Service;
 
-    public CourseService(CourseRepository courseRepository, CourseCategoryRepository courseCategoryRepository, CourseMapper courseMapper) {
+    public CourseService(CourseRepository courseRepository, CourseCategoryRepository courseCategoryRepository, CourseMapper courseMapper, AwsS3Service awsS3Service) {
         this.courseRepository = courseRepository;
         this.courseCategoryRepository = courseCategoryRepository;
         this.courseMapper = courseMapper;
+        this.awsS3Service = awsS3Service;
     }
 
-    public CourseDto create(String name, String description, String instructor, String durationMinutes, UUID courseCategoryId) {
-        log.info("Creating course with name: {}, instructor: {}, category: {}", name, instructor, courseCategoryId);
-        if (name == null || name.isEmpty()) {
-            throw new EntityNotFoundException("Course name cannot be null or empty");
+    public CourseDto create(CreateCourseRequest request) {
+        log.info("Creating course with request: {}", request);
+        if (request == null && request.getName().isEmpty()) {
+            throw new EntityNotFoundException("Course or course name cannot be null or empty");
         }
-        if (courseRepository.existsByName(name)) {
+        if (courseRepository.existsByName(request.getName())) {
             throw new EntityAlreadyExistsException("Course with this name already exists");
         }
-        CourseCategory category = courseCategoryRepository.findById(courseCategoryId)
-                .orElseThrow(() -> new EntityNotFoundException("Course category not found with id: " + courseCategoryId));
+        CourseCategory category = courseCategoryRepository.findById(UUID.fromString(request.getCourseCategoryId()))
+                .orElseThrow(() -> new EntityNotFoundException("Course category not found with id: " + request.getCourseCategoryId()));
         Course course = Course.builder()
-                .name(name)
-                .description(description)
-                .instructor(instructor)
-                .durationMinutes(durationMinutes)
+                .name(request.getName())
+                .description(request.getDescription())
+                .instructor(request.getInstructor())
+                .durationMinutes(request.getDurationMinutes())
                 .courseCategory(category)
+                .mandatory(request.isMandatory())
                 .build();
+        String imageUrl = uploadCourseImage(request.getName(), request.getImageFile());
+        course.setImageUrl(imageUrl);
         Course savedCourse = saveEntity(course);
+
         log.info("Course created successfully: {}", savedCourse);
         return courseMapper.entityToDto(savedCourse);
     }
-
+    private String uploadCourseImage(String name, MultipartFile file) {
+        return awsS3Service.uploadCourseImage(name, file);
+    }
     public CourseDto getById(UUID id) {
         log.info("Fetching course by id: {}", id);
         Course course = courseRepository.findById(id)

@@ -33,6 +33,11 @@ public class AwsS3Service {
         String fileName = "profile-pictures/" + tckn + "_" + file.getOriginalFilename();
         return saveImageToS3(file, fileName);
     }
+    public String uploadCourseImage(String courseName, MultipartFile file) {
+        String fileName = "course-images/" + courseName + "_" + file.getOriginalFilename();
+        return saveImageToS3(file, fileName);
+    }
+
 
     public void deleteProfilePicture(String fileUrl) {
         try {

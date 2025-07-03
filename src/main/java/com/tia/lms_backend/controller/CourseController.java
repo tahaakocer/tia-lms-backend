@@ -1,6 +1,7 @@
 package com.tia.lms_backend.controller;
 
 import com.tia.lms_backend.dto.CourseDto;
+import com.tia.lms_backend.dto.request.CreateCourseRequest;
 import com.tia.lms_backend.dto.response.GeneralResponse;
 import com.tia.lms_backend.service.CourseService;
 import org.springframework.http.ResponseEntity;
@@ -20,13 +21,9 @@ public class CourseController {
 
     @PostMapping
     public ResponseEntity<GeneralResponse<CourseDto>> createCourse(
-            @RequestParam String name,
-            @RequestParam(required = false) String description,
-            @RequestParam String instructor,
-            @RequestParam String durationMinutes,
-            @RequestParam UUID courseCategoryId
+            @ModelAttribute CreateCourseRequest createCourseRequest
     ) {
-        CourseDto courseDto = courseService.create(name, description, instructor, durationMinutes, courseCategoryId);
+        CourseDto courseDto = courseService.create(createCourseRequest);
         return ResponseEntity.ok(GeneralResponse.<CourseDto>builder()
                 .code(201)
                 .message("Course created successfully.")
