@@ -1,0 +1,75 @@
+package com.tia.lms_backend.service;
+
+
+import com.tia.lms_backend.dto.ContactDto;
+import com.tia.lms_backend.dto.request.CreateContactRequest;
+import com.tia.lms_backend.exception.EntityNotFoundException;
+import com.tia.lms_backend.mapper.ContactMapper;
+import com.tia.lms_backend.model.Contact;
+import com.tia.lms_backend.model.enums.ContactPriority;
+import com.tia.lms_backend.model.enums.ContactStatus;
+import com.tia.lms_backend.repository.ContactRepository;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.stereotype.Service;
+import com.tia.lms_backend.mapper.ContactMapper;
+
+import java.util.List;
+import java.util.UUID;
+
+@Service
+@Log4j2
+public class ContactService {
+    private final ContactRepository contactRepository;
+    private final ContactMapper contactMapper;
+
+    public ContactService(ContactRepository contactRepository,ContactMapper contactMapper){
+        this.contactRepository = contactRepository;
+        this.contactMapper = contactMapper;
+    }
+
+    public ContactDto create(CreateContactRequest request) {
+        log.info("Creating contact for userId: {}", request.getUserId());
+        Contact contact = contactMapper.createRequestToEntity(request);
+        contact.setContactStatus(ContactStatus.PENDING);
+        Contact savedContact = contactRepository.save(contact);
+        log.info("Contact created successfully: {}", savedContact);
+        return contactMapper.entityToDto(savedContact);
+    }
+
+    public ContactDto getById(UUID id) {
+        log.info("Fetching contact by id: {}", id);
+        Contact contact = contactRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Contact not found with id: " + id));
+        return contactMapper.entityToDto(contact);
+    }
+
+    public List<ContactDto> getAll() {
+        log.info("Fetching all contacts");
+        List<Contact> contacts = contactRepository.findAll();
+        if (contacts.isEmpty()) {
+            throw new EntityNotFoundException("No contacts found");
+        }
+        return contacts.stream().map(contactMapper::entityToDto).toList();
+    }
+
+    public void delete(UUID id) {
+        log.info("Deleting contact with id: {}", id);
+        Contact contact = contactRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Contact not found with id: " + id));
+        contactRepository.delete(contact);
+        log.info("Contact deleted successfully: {}", contact);
+    }
+
+    public ContactDto updateStatus(UUID id, ContactStatus status) {
+        log.info("Updating contact status for id: {}", id);
+        Contact contact = contactRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Contact not found with id: " + id));
+        contact.setContactStatus(status);
+        Contact updated = contactRepository.save(contact);
+        return contactMapper.entityToDto(updated);
+    }
+
+
+
+
+}

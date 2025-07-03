@@ -1,5 +1,6 @@
 package com.tia.lms_backend.model;
 
+import com.tia.lms_backend.model.enums.ContactPriority;
 import com.tia.lms_backend.model.enums.ContactStatus;
 import jakarta.persistence.*;
 import lombok.*;
@@ -20,6 +21,8 @@ public class Contact extends BaseEntity {
     private String lastName;
     private String email;
     private String contentTitle;
+    @Enumerated(EnumType.STRING)
+    private ContactPriority priority;
 
     @Column(columnDefinition = "TEXT")
     private String content;
