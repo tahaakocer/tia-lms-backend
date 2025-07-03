@@ -2,6 +2,8 @@ package com.tia.lms_backend.controller;
 
 import com.tia.lms_backend.dto.CourseDto;
 import com.tia.lms_backend.dto.request.CreateCourseRequest;
+import com.tia.lms_backend.dto.response.CourseWithCompletionRateDto;
+import com.tia.lms_backend.dto.response.CourseWithEnrollmentsDto;
 import com.tia.lms_backend.dto.response.GeneralResponse;
 import com.tia.lms_backend.service.CourseService;
 import org.springframework.http.ResponseEntity;
@@ -52,9 +54,9 @@ public class CourseController {
     }
 
     @GetMapping
-    public ResponseEntity<GeneralResponse<List<CourseDto>>> getAll() {
-        List<CourseDto> courseDtos = courseService.getAll();
-        return ResponseEntity.ok(GeneralResponse.<List<CourseDto>>builder()
+    public ResponseEntity<GeneralResponse<List<CourseWithCompletionRateDto>>> getAll() {
+        List<CourseWithCompletionRateDto> courseDtos = courseService.getAllWithCompletionRates();
+        return ResponseEntity.ok(GeneralResponse.<List<CourseWithCompletionRateDto>>builder()
                 .code(200)
                 .message("Courses retrieved successfully.")
                 .data(courseDtos)
@@ -69,4 +71,14 @@ public class CourseController {
                 .message("Course deleted successfully.")
                 .build());
     }
+    @GetMapping("/{id}/with-enrollments")
+    public ResponseEntity<GeneralResponse<CourseWithEnrollmentsDto>> getCourseWithEnrollments(@PathVariable UUID id) {
+        CourseWithEnrollmentsDto dto = courseService.getByIdWithEnrollments(id);
+        return ResponseEntity.ok(GeneralResponse.<CourseWithEnrollmentsDto>builder()
+                .code(200)
+                .message("Course with enrollments retrieved successfully.")
+                .data(dto)
+                .build());
+    }
+
 }

@@ -1,17 +1,23 @@
 package com.tia.lms_backend.service;
 
 import com.tia.lms_backend.dto.CourseDto;
+import com.tia.lms_backend.dto.CourseEnrollmentDto;
+import com.tia.lms_backend.dto.EnrollmentDto;
 import com.tia.lms_backend.dto.request.CreateCourseRequest;
 import com.tia.lms_backend.dto.request.CreateEmployeeRequest;
+import com.tia.lms_backend.dto.response.CourseWithCompletionRateDto;
+import com.tia.lms_backend.dto.response.CourseWithEnrollmentsDto;
 import com.tia.lms_backend.exception.EntityAlreadyExistsException;
 import com.tia.lms_backend.exception.EntityNotFoundException;
 import com.tia.lms_backend.exception.GeneralException;
 import com.tia.lms_backend.mapper.CourseMapper;
-import com.tia.lms_backend.model.Course;
-import com.tia.lms_backend.model.CourseCategory;
-import com.tia.lms_backend.model.CourseContent;
+import com.tia.lms_backend.mapper.EnrollmentMapper;
+import com.tia.lms_backend.model.*;
+import com.tia.lms_backend.model.enums.Status;
 import com.tia.lms_backend.repository.CourseCategoryRepository;
 import com.tia.lms_backend.repository.CourseRepository;
+import com.tia.lms_backend.repository.EnrollmentRepository;
+import com.tia.lms_backend.repository.UserCourseContentRepository;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -27,15 +33,23 @@ public class CourseService {
     private final CourseCategoryRepository courseCategoryRepository;
     private final CourseMapper courseMapper;
     private final AwsS3Service awsS3Service;
-
+    private final EnrollmentMapper enrollmentMapper;
+    private final EnrollmentRepository enrollmentRepository;
+    private final UserCourseContentRepository userCourseContentRepository;
     public CourseService(CourseRepository courseRepository,
                          CourseCategoryRepository courseCategoryRepository,
                          CourseMapper courseMapper,
-                         AwsS3Service awsS3Service) {
+                         AwsS3Service awsS3Service,
+                         EnrollmentMapper enrollmentMapper,
+                         EnrollmentRepository enrollmentRepository,
+                         UserCourseContentRepository userCourseContentRepository) {
         this.courseRepository = courseRepository;
         this.courseCategoryRepository = courseCategoryRepository;
         this.courseMapper = courseMapper;
         this.awsS3Service = awsS3Service;
+        this.enrollmentMapper = enrollmentMapper;
+        this.enrollmentRepository = enrollmentRepository;
+        this.userCourseContentRepository = userCourseContentRepository;
     }
 
     public CourseDto create(CreateCourseRequest request) {
@@ -114,6 +128,26 @@ public class CourseService {
         log.info("Converted courses to DTOs: {}", courseDtos);
         return courseDtos;
     }
+    public List<CourseWithCompletionRateDto> getAllWithCompletionRates() {
+        log.info("Fetching all courses with completion rates");
+
+        List<Course> courses = courseRepository.findAll();
+
+        return courses.stream()
+                .map(course -> {
+                    List<UserCourseContent> contents = userCourseContentRepository.findAllByCourseId(course.getId());
+                    long total = contents.size();
+                    long completed = contents.stream().filter(c -> c.getStatus() == Status.COMPLETED).count();
+                    double rate = (total == 0) ? 0.0 : ((double) completed / total) * 100.0;
+
+                    return CourseWithCompletionRateDto.builder()
+                            .course(courseMapper.entityToDto(course))
+                            .completionRate(rate)
+                            .build();
+                })
+                .collect(Collectors.toList());
+
+    }
 
     public void delete(UUID id) {
         log.info("Deleting course with id: {}", id);
@@ -123,6 +157,21 @@ public class CourseService {
         log.info("Course deleted successfully: {}", course);
     }
 
+    public CourseWithEnrollmentsDto getByIdWithEnrollments(UUID courseId) {
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new EntityNotFoundException("Course not found with id: " + courseId));
+
+        List<Enrollment> enrollments = enrollmentRepository.findAllByCourse(course);
+
+        List<CourseEnrollmentDto> enrollmentDtos = enrollments.stream()
+                .map(enrollmentMapper::entityToCourseEnrollmentDto)
+                .toList();
+
+        return CourseWithEnrollmentsDto.builder()
+                .course(courseMapper.entityToDto(course))
+                .enrollments(enrollmentDtos)
+                .build();
+    }
     private Course saveEntity(Course course) {
         try {
             if (course == null || course.getName() == null || course.getName().isEmpty()) {

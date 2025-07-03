@@ -30,4 +30,6 @@ public class EnrollmentResponseDto {
     private Status status;
 
     private List<EnrollmentCourseContentDto> userCourseContents;
+    private Double courseCompletionRate;
+    private Double totalCompletionRate;
 }

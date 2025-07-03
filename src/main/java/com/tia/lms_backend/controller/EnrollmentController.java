@@ -56,9 +56,9 @@ public class EnrollmentController {
     }
 
     @GetMapping
-    public ResponseEntity<GeneralResponse<List<EnrollmentDto>>> getAllEnrollments() {
-        List<EnrollmentDto> enrollmentDtoList = enrollmentService.getAll();
-        return ResponseEntity.ok(GeneralResponse.<List<EnrollmentDto>>builder()
+    public ResponseEntity<GeneralResponse<List<EnrollmentResponseDto>>> getAllEnrollments() {
+        List<EnrollmentResponseDto> enrollmentDtoList = enrollmentService.getAll();
+        return ResponseEntity.ok(GeneralResponse.<List<EnrollmentResponseDto>>builder()
                 .code(200)
                 .message("Enrollment retrieved successfully.")
                 .data(enrollmentDtoList)
@@ -74,14 +74,37 @@ public class EnrollmentController {
                 .build());
     }
 
-    @GetMapping("/get-by-user-id")
-    public ResponseEntity<GeneralResponse<List<EnrollmentResponseDto>>> getEnrollmentsByUserId(@RequestParam UUID userId) {
+    @GetMapping("/get-by-user-id/{userId}")
+    public ResponseEntity<GeneralResponse<List<EnrollmentResponseDto>>> getEnrollmentsByUserId(@PathVariable UUID userId) {
         List<EnrollmentResponseDto> enrollmentDtoList = enrollmentService.getByUserId(userId);
         return ResponseEntity.ok(GeneralResponse.<List<EnrollmentResponseDto>>builder()
                 .code(200)
                 .message("Enrollments retrieved successfully.")
                 .data(enrollmentDtoList)
                 .build());
+    }
+    @GetMapping("/get-by-team-id/{teamId}")
+    public ResponseEntity<GeneralResponse<List<EnrollmentResponseDto>>> getEnrollmentsByTeamId(@PathVariable UUID teamId) {
+        List<EnrollmentResponseDto> responseList = enrollmentService.getByTeamId(teamId);
+        return ResponseEntity.ok(
+                GeneralResponse.<List<EnrollmentResponseDto>>builder()
+                        .code(200)
+                        .message("Enrollments retrieved successfully.")
+                        .data(responseList)
+                        .build()
+        );
+    }
+
+    @GetMapping("/get-by-department-id/{departmentId}")
+    public ResponseEntity<GeneralResponse<List<EnrollmentResponseDto>>> getEnrollmentsByDepartmentId(@PathVariable UUID departmentId) {
+        List<EnrollmentResponseDto> responseList = enrollmentService.getByDepartmentId(departmentId);
+        return ResponseEntity.ok(
+                GeneralResponse.<List<EnrollmentResponseDto>>builder()
+                        .code(200)
+                        .message("Enrollments retrieved successfully.")
+                        .data(responseList)
+                        .build()
+        );
     }
 
 }
