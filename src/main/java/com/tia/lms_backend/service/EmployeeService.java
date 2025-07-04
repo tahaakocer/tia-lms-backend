@@ -269,4 +269,11 @@ public class EmployeeService {
             throw new EntityNotFoundException("User entity is invalid");
         }
     }
+
+    public UserDto getUserByTckn(String tckn) {
+        log.info("Fetching user by TCKN: {}", tckn);
+        User user = userRepository.findByTckn(tckn)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with TCKN: " + tckn));
+        return userMapper.entityToDto(user);
+    }
 }

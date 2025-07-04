@@ -81,6 +81,16 @@ public class GeneralExceptionHandler {
         log.error("{}:{}", errorResponse.getMessage(), ex.getMessage());
         return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
+    @ExceptionHandler(GeneralUnauthorizedException.class)
+    public ResponseEntity<GeneralResponse<?>> handleGeneralUnauthorizedException(GeneralUnauthorizedException ex) {
+        GeneralResponse<?> errorResponse = GeneralResponse.builder()
+                .code(HttpStatus.UNAUTHORIZED.value())
+                .message(ex.getMessage())
+                .data(null)
+                .build();
+        log.error("{}:{}", errorResponse.getMessage(), ex.getMessage());
+        return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
+    }
 
 //    @ExceptionHandler(Exception.class)
 //    public ResponseEntity<GeneralResponse<?>> handleGeneralException(Exception ex) {

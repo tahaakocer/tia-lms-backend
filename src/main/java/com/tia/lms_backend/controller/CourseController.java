@@ -7,6 +7,7 @@ import com.tia.lms_backend.dto.response.CourseWithEnrollmentsDto;
 import com.tia.lms_backend.dto.response.GeneralResponse;
 import com.tia.lms_backend.service.CourseService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,6 +22,7 @@ public class CourseController {
         this.courseService = courseService;
     }
 
+    @PreAuthorize("hasAuthority(\"ROLE_HR\")")
     @PostMapping
     public ResponseEntity<GeneralResponse<CourseDto>> createCourse(
             @ModelAttribute CreateCourseRequest createCourseRequest
@@ -32,7 +34,7 @@ public class CourseController {
                 .data(courseDto)
                 .build());
     }
-
+    @PreAuthorize("hasAnyAuthority(\"ROLE_HR\", \"ROLE_TEAMLEAD\", \"ROLE_EMPLOYEE\")")
     @GetMapping("/{id}")
     public ResponseEntity<GeneralResponse<CourseDto>> getCourseById(@PathVariable UUID id) {
         CourseDto courseDto = courseService.getById(id);
@@ -42,7 +44,7 @@ public class CourseController {
                 .data(courseDto)
                 .build());
     }
-
+    @PreAuthorize("hasAnyAuthority(\"ROLE_HR\", \"ROLE_TEAMLEAD\", \"ROLE_EMPLOYEE\")")
     @GetMapping("/get-by-name")
     public ResponseEntity<GeneralResponse<CourseDto>> getCourseByName(@RequestParam String name) {
         CourseDto courseDto = courseService.getByName(name);
@@ -52,7 +54,7 @@ public class CourseController {
                 .data(courseDto)
                 .build());
     }
-
+    @PreAuthorize("hasAnyAuthority(\"ROLE_HR\", \"ROLE_TEAMLEAD\", \"ROLE_EMPLOYEE\")")
     @GetMapping
     public ResponseEntity<GeneralResponse<List<CourseWithCompletionRateDto>>> getAll() {
         List<CourseWithCompletionRateDto> courseDtos = courseService.getAllWithCompletionRates();
@@ -62,7 +64,7 @@ public class CourseController {
                 .data(courseDtos)
                 .build());
     }
-
+    @PreAuthorize("hasAuthority(\"ROLE_HR\")")
     @DeleteMapping("/{id}")
     public ResponseEntity<GeneralResponse<Void>> deleteCourse(@PathVariable UUID id) {
         courseService.delete(id);
@@ -71,6 +73,7 @@ public class CourseController {
                 .message("Course deleted successfully.")
                 .build());
     }
+    @PreAuthorize("hasAnyAuthority(\"ROLE_HR\", \"ROLE_TEAMLEAD\", \"ROLE_EMPLOYEE\")")
     @GetMapping("/{id}/with-enrollments")
     public ResponseEntity<GeneralResponse<CourseWithEnrollmentsDto>> getCourseWithEnrollments(@PathVariable UUID id) {
         CourseWithEnrollmentsDto dto = courseService.getByIdWithEnrollments(id);

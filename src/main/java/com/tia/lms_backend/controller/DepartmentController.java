@@ -5,6 +5,7 @@ import com.tia.lms_backend.dto.response.GeneralResponse;
 import com.tia.lms_backend.service.DepartmentService;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,6 +21,7 @@ public class DepartmentController {
         this.departmentService = departmentService;
     }
 
+    @PreAuthorize("hasAuthority(\"ROLE_HR\")")
     @PostMapping
     public ResponseEntity<GeneralResponse<DepartmentDto>> createDepartment(
             @RequestParam @NotBlank String name,
@@ -32,7 +34,7 @@ public class DepartmentController {
                 .data(departmentDto)
                 .build());
     }
-
+    @PreAuthorize("hasAnyAuthority(\"ROLE_HR\", \"ROLE_TEAMLEAD\", \"ROLE_EMPLOYEE\")")
     @GetMapping("/{id}")
     public ResponseEntity<GeneralResponse<DepartmentDto>> getDepartmentById(
             @PathVariable UUID id
@@ -44,7 +46,7 @@ public class DepartmentController {
                 .data(departmentDto)
                 .build());
     }
-
+    @PreAuthorize("hasAnyAuthority(\"ROLE_HR\", \"ROLE_TEAMLEAD\", \"ROLE_EMPLOYEE\")")
     @GetMapping("/get-by-name")
     public ResponseEntity<GeneralResponse<DepartmentDto>> getDepartmentByName(
             @RequestParam String name
@@ -56,7 +58,7 @@ public class DepartmentController {
                 .data(departmentDto)
                 .build());
     }
-
+    @PreAuthorize("hasAnyAuthority(\"ROLE_HR\", \"ROLE_TEAMLEAD\", \"ROLE_EMPLOYEE\")")
     @GetMapping
     public ResponseEntity<GeneralResponse<List<DepartmentDto>>> getAll() {
         List<DepartmentDto> departmentDtos = this.departmentService.getAll();

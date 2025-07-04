@@ -4,6 +4,7 @@ import com.tia.lms_backend.dto.RoleDto;
 import com.tia.lms_backend.dto.response.GeneralResponse;
 import com.tia.lms_backend.service.RoleService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,7 +19,7 @@ public class RoleController {
     public RoleController(RoleService roleService) {
         this.roleService = roleService;
     }
-
+    @PreAuthorize("hasAuthority('ROLE_HR')")
     @PostMapping
     public ResponseEntity<GeneralResponse<RoleDto>> createRole(
             @RequestParam String name,
@@ -31,6 +32,7 @@ public class RoleController {
                 .data(roleDto)
                 .build());
     }
+    @PreAuthorize("hasAnyAuthority(\"ROLE_HR\", \"ROLE_TEAMLEAD\", \"ROLE_EMPLOYEE\")")
     @GetMapping("/{id}")
     public ResponseEntity<GeneralResponse<RoleDto>> getRoleById(
             @RequestParam UUID id
@@ -42,6 +44,7 @@ public class RoleController {
                 .data(roleDto)
                 .build());
     }
+    @PreAuthorize("hasAnyAuthority(\"ROLE_HR\", \"ROLE_TEAMLEAD\", \"ROLE_EMPLOYEE\")")
     @GetMapping("/get-by-name")
     public ResponseEntity<GeneralResponse<RoleDto>> getRoleByName(
             @RequestParam String name
@@ -53,6 +56,7 @@ public class RoleController {
                 .data(roleDto)
                 .build());
     }
+    @PreAuthorize("hasAuthority(\"ROLE_HR\")")
     @GetMapping
     public ResponseEntity<GeneralResponse<List<RoleDto>>> getAll(
     ) {

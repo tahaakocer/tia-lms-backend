@@ -1,11 +1,15 @@
 package com.tia.lms_backend.security;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.header.writers.frameoptions.XFrameOptionsHeaderWriter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -19,6 +23,7 @@ import java.util.List;
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
+
     private final JwtAuthConverter jwtAuthConverter;
 
     public SecurityConfig(JwtAuthConverter jwtAuthConverter) {
@@ -26,29 +31,36 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, JwtDecoder jwtDecoder) throws Exception {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .headers(headers -> headers
-                        .frameOptions(
-                                frameOptions -> frameOptions
-                                        .sameOrigin()
-                                        .defaultsDisabled()
-                                        .addHeaderWriter(
-                                                new XFrameOptionsHeaderWriter(
-                                                        XFrameOptionsHeaderWriter.XFrameOptionsMode.SAMEORIGIN)
-                                        )
+                        .frameOptions(frameOptions -> frameOptions
+                                .sameOrigin()
+                                .defaultsDisabled()
+                                .addHeaderWriter(new XFrameOptionsHeaderWriter(
+                                        XFrameOptionsHeaderWriter.XFrameOptionsMode.SAMEORIGIN))
                         )
                 )
                 .authorizeHttpRequests(authorize -> authorize
-//                        .requestMatchers("/api/crm/**").hasRole("user")
                         .anyRequest().permitAll()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2
-                        .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthConverter))
+                        .jwt(jwt -> jwt
+                                .decoder(jwtDecoder)  // Spring, method parametre injection yapar
+                                .jwtAuthenticationConverter(jwtAuthConverter)
+                        )
                 )
                 .csrf(AbstractHttpConfigurer::disable);
         return http.build();
+    }
+
+    @Bean
+    public JwtDecoder jwtDecoder(
+            StringRedisTemplate redisTemplate,
+            @Value("${spring.security.oauth2.resourceserver.jwt.jwk-set-uri}") String jwkSetUri) {
+        JwtDecoder baseDecoder = NimbusJwtDecoder.withJwkSetUri(jwkSetUri).build();
+        return new BlacklistAwareJwtDecoder(baseDecoder, redisTemplate);
     }
 
     @Bean
@@ -64,5 +76,4 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
-
 }
