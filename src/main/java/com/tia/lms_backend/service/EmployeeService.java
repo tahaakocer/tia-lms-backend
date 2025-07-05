@@ -71,6 +71,26 @@ public class EmployeeService {
 
         return userMapper.entityToDto(savedUser);
     }
+    public UserDto registerEmployeeWithoutDefaultProfilePicture(CreateEmployeeRequest request) {
+        log.info("Registering employee WITHOUT default profile picture. Request: {}", request);
+        validateRequest(request);
+
+        Department department = getDepartment(request.getDepartmentId());
+        Role role = getEmployeeRole();
+
+        User user = buildUser(request, department, role, null);
+
+        // Fotoğraf yoksa NULL bırak
+        user.setAvatarUrl(null);
+
+        String keycloakId = keycloakService.createKeycloakUser(user.getTckn(), user.getEmail(), null);
+        user.setKeycloakId(keycloakId);
+
+        User savedUser = saveEntity(user);
+
+        return userMapper.entityToDto(savedUser);
+    }
+
     public List<UserDto> getAllEmployees() {
         try {
             List<User> users = userRepository.findAll();

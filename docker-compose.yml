@@ -7,7 +7,7 @@ services:
       - POSTGRES_USER=${DB_USERNAME}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
     ports:
-      - "5454:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: always
@@ -18,7 +18,7 @@ services:
     image: redis:latest
     container_name: lms_redis
     ports:
-      - "6400:6379"
+      - "6379:6379"
     networks:
       - redis_network
     volumes:
@@ -28,7 +28,7 @@ services:
     image: redislabs/redisinsight:latest
     container_name: lms_redisinsight
     ports:
-      - "5541:5540"
+      - "5540:5540"
     networks:
       - redis_network
   keycloak:
