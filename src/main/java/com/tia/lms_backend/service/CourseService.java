@@ -100,7 +100,14 @@ public class CourseService {
     }
 
     private String uploadCourseImage(String name, MultipartFile file) {
-        return awsS3Service.uploadCourseImage(name, file);
+        if(file == null || file.isEmpty()) {
+            log.error("File is null or empty for course: {}", name);
+            return "https://habitatbroward.org/wp-content/uploads/2020/01/10-Benefits-Showing-Why-Education-Is-Important-to-Our-Society.jpg";
+        }
+        else {
+            log.info("Uploading course image for course: {}", name);
+            return awsS3Service.uploadCourseImage(name, file);
+        }
     }
     public CourseDto getById(UUID id) {
         log.info("Fetching course by id: {}", id);
