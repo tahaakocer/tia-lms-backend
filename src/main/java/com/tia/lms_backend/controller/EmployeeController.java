@@ -21,7 +21,7 @@ public class EmployeeController {
         this.employeeService = employeeService;
     }
 
-    @PreAuthorize("hasAuthority(\"ROLE_HR\")")
+ ////   @PreAuthorize("hasAuthority(\"ROLE_HR\")")
     @PostMapping("/create")
     public ResponseEntity<GeneralResponse<UserDto>> createEmployee(
             @ModelAttribute CreateEmployeeRequest createEmployeeRequest
@@ -33,7 +33,7 @@ public class EmployeeController {
                 .data(createdUser)
                 .build());
     }
-    @PreAuthorize("hasAuthority(\"ROLE_HR\")")
+//    @PreAuthorize("hasAuthority(\"ROLE_HR\")")
     @GetMapping
     public ResponseEntity<GeneralResponse<List<UserDto>>> getAllEmployees() {
         List<UserDto> employees = employeeService.getAllEmployees();
@@ -43,7 +43,7 @@ public class EmployeeController {
                 .data(employees)
                 .build());
     }
-    @PreAuthorize("hasAnyAuthority(\"ROLE_HR\", \"ROLE_TEAMLEAD\", \"ROLE_EMPLOYEE\")")
+ //   @PreAuthorize("hasAnyAuthority(\"ROLE_HR\", \"ROLE_TEAMLEAD\", \"ROLE_EMPLOYEE\")")
     @GetMapping("/{id}")
     public ResponseEntity<GeneralResponse<UserDto>> getEmployeeById(@PathVariable UUID id) {
         UserDto employee = employeeService.getEmployeeById(id);
@@ -53,7 +53,7 @@ public class EmployeeController {
                 .data(employee)
                 .build());
     }
-    @PreAuthorize("hasAnyAuthority(\"ROLE_HR\", \"ROLE_TEAMLEAD\", \"ROLE_EMPLOYEE\")")
+  //  @PreAuthorize("hasAnyAuthority(\"ROLE_HR\", \"ROLE_TEAMLEAD\", \"ROLE_EMPLOYEE\")")
     @GetMapping("/get-by-role")
     public ResponseEntity<GeneralResponse<List<UserDto>>> getEmployeesByRole(@RequestParam String role) {
         List<UserDto> employees = employeeService.getEmployeesByRole(role);
@@ -63,7 +63,7 @@ public class EmployeeController {
                 .data(employees)
                 .build());
     }
-    @PreAuthorize("hasAnyAuthority(\"ROLE_HR\", \"ROLE_TEAMLEAD\", \"ROLE_EMPLOYEE\")")
+  //  @PreAuthorize("hasAnyAuthority(\"ROLE_HR\", \"ROLE_TEAMLEAD\", \"ROLE_EMPLOYEE\")")
     @GetMapping("/get-by-department/{departmentId}")
     public ResponseEntity<GeneralResponse<List<UserDto>>> getEmployeesByDepartment(@PathVariable UUID departmentId) {
         List<UserDto> employees = employeeService.getEmployeesByDepartmentId(departmentId);
@@ -72,7 +72,9 @@ public class EmployeeController {
                 .message("Employees by department fetched successfully.")
                 .data(employees)
                 .build());
-    }    @PreAuthorize("hasAnyAuthority(\"ROLE_HR\", \"ROLE_TEAMLEAD\", \"ROLE_EMPLOYEE\")")
+    }
+
+   // @PreAuthorize("hasAnyAuthority(\"ROLE_HR\", \"ROLE_TEAMLEAD\", \"ROLE_EMPLOYEE\")")
     @GetMapping("/get-by-team/{teamId}")
     public ResponseEntity<GeneralResponse<List<UserDto>>> getEmployeesByTeam(@PathVariable UUID teamId) {
         List<UserDto> employees = employeeService.getEmployeesByTeamId(teamId);
@@ -82,7 +84,7 @@ public class EmployeeController {
                 .data(employees)
                 .build());
     }
-    @PreAuthorize("hasAnyAuthority(\"ROLE_HR\", \"ROLE_TEAMLEAD\")")
+   // @PreAuthorize("hasAnyAuthority(\"ROLE_HR\", \"ROLE_TEAMLEAD\")")
     @PostMapping("/assign-to-team")
     public ResponseEntity<GeneralResponse<UserDto>> assignToTeam(
             @RequestParam UUID userId,
@@ -95,7 +97,7 @@ public class EmployeeController {
                 .data(assignedUser)
                 .build());
     }
-    @PreAuthorize("hasAnyAuthority(\"ROLE_HR\", \"ROLE_TEAMLEAD\")")
+   // @PreAuthorize("hasAnyAuthority(\"ROLE_HR\", \"ROLE_TEAMLEAD\")")
     @PostMapping("/remove-from-team")
     public ResponseEntity<GeneralResponse<UserDto>> removeFromTeam(
             @RequestParam UUID userId

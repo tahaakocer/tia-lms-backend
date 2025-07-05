@@ -21,7 +21,7 @@ public class CourseCategoryController {
 
     private final CourseCategoryService courseCategoryService;
 
-    @PreAuthorize("hasAuthority(\"ROLE_HR\")")
+ //   @PreAuthorize("hasAuthority(\"ROLE_HR\")")
     @PostMapping
     public ResponseEntity<GeneralResponse<CourseCategoryDto>> create(
             @RequestParam @NotBlank String name,
@@ -38,7 +38,7 @@ public class CourseCategoryController {
                         .build()
         );
     }
-    @PreAuthorize("hasAnyAuthority(\"ROLE_HR\", \"ROLE_TEAMLEAD\", \"ROLE_EMPLOYEE\")")
+//@PreAuthorize("hasAnyAuthority(\"ROLE_HR\", \"ROLE_TEAMLEAD\", \"ROLE_EMPLOYEE\")")
     @GetMapping
     public ResponseEntity<GeneralResponse<List<CourseCategoryDto>>> getAll() {
         List<CourseCategoryDto> dtos = courseCategoryService.getAll();
@@ -50,7 +50,7 @@ public class CourseCategoryController {
                         .build()
         );
     }
-    @PreAuthorize("hasAnyAuthority(\"ROLE_HR\", \"ROLE_TEAMLEAD\", \"ROLE_EMPLOYEE\")")
+//    @PreAuthorize("hasAnyAuthority(\"ROLE_HR\", \"ROLE_TEAMLEAD\", \"ROLE_EMPLOYEE\")")
     @GetMapping("/{id}")
     public ResponseEntity<GeneralResponse<CourseCategoryDto>> getById(@PathVariable UUID id) {
         CourseCategoryDto dto = courseCategoryService.getById(id);
@@ -62,7 +62,7 @@ public class CourseCategoryController {
                         .build()
         );
     }
-    @PreAuthorize("hasAnyAuthority(\"ROLE_HR\", \"ROLE_TEAMLEAD\", \"ROLE_EMPLOYEE\")")
+//    @PreAuthorize("hasAnyAuthority(\"ROLE_HR\", \"ROLE_TEAMLEAD\", \"ROLE_EMPLOYEE\")")
     @GetMapping("/get-by-name")
     public ResponseEntity<GeneralResponse<CourseCategoryDto>> getById(@RequestParam String name) {
         CourseCategoryDto dto = courseCategoryService.getByName(name);
@@ -74,7 +74,7 @@ public class CourseCategoryController {
                         .build()
         );
     }
-    @PreAuthorize("hasAuthority(\"ROLE_HR\")")
+ //   @PreAuthorize("hasAuthority(\"ROLE_HR\")")
     @DeleteMapping("/{id}")
     public ResponseEntity<GeneralResponse<Void>> delete(@PathVariable UUID id) {
         courseCategoryService.delete(id);

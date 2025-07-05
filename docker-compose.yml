@@ -7,17 +7,18 @@ services:
       - POSTGRES_USER=${DB_USERNAME}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
     ports:
-      - "5432:5432"
+      - "5454:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: always
     networks:
+      - postgres_network
       - keycloak_network
   redis:
     image: redis:latest
     container_name: lms_redis
     ports:
-      - "6379:6379"
+      - "6400:6379"
     networks:
       - redis_network
     volumes:
@@ -27,14 +28,14 @@ services:
     image: redislabs/redisinsight:latest
     container_name: lms_redisinsight
     ports:
-      - "5540:5540"
+      - "5541:5540"
     networks:
       - redis_network
   keycloak:
     image: quay.io/keycloak/keycloak:latest
     command: start
     environment:
-      KC_HOSTNAME: localhost
+      KC_HOSTNAME: ${KC_HOSTNAME}
       KC_HOSTNAME_PORT: 8080
       KC_HOSTNAME_STRICT_BACKCHANNEL: false
       KC_HTTP_ENABLED: true
@@ -53,10 +54,48 @@ services:
       - postgres
     networks:
       - keycloak_network
+  app:
+    image: tahaakocer/lms-backend:latest
+    ports:
+      - "9999:9999"
+    environment:
+      - DB_URL=${DB_URL}
+      - DB_NAME=${DB_NAME}
+      - DB_PORT=${DB_PORT}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - REALM=${REALM}
+      - CLIENT_ID=${CLIENT_ID}
+      - CLIENT_SECRET=${CLIENT_SECRET}
+      - IDM_USERNAME=${IDM_USERNAME}
+      - IDM_PASSWORD=${IDM_PASSWORD}
+      - PRINCIPLE_ATTRIBUTE=${PRINCIPLE_ATTRIBUTE}
+      - JWT_ISSUER_URI=${JWT_ISSUER_URI}
+      - ADMIN_AUTH_URL=${ADMIN_AUTH_URL}
+      - ADMIN_USER_ID=${ADMIN_USER_ID}
+      - ADMIN_USER_PASSWORD=${ADMIN_USER_PASSWORD}
+      - MAIL_USERNAME=${MAIL_USERNAME}
+      - MAIL_PASSWORD=${MAIL_PASSWORD}
+      - AWS_ACCESS_KEY=${AWS_ACCESS_KEY}
+      - AWS_SECRET_KEY=${AWS_SECRET_KEY}
+      - AWS_REGION=${AWS_REGION}
+      - AWS_S3_BUCKET_NAME=${AWS_S3_BUCKET_NAME}
+    restart: always
+    networks:
+      - redis_network
+      - keycloak_network
+      - postgres_network
+    depends_on:
+      - redis
+      - postgres
 networks:
   redis_network:
     driver: bridge
   keycloak_network:
+    driver: bridge
+  postgres_network:
     driver: bridge
 volumes:
   postgres_data:

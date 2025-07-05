@@ -19,7 +19,7 @@ public class RoleController {
     public RoleController(RoleService roleService) {
         this.roleService = roleService;
     }
-    @PreAuthorize("hasAuthority('ROLE_HR')")
+  //  @PreAuthorize("hasAuthority('ROLE_HR')")
     @PostMapping
     public ResponseEntity<GeneralResponse<RoleDto>> createRole(
             @RequestParam String name,
@@ -32,7 +32,7 @@ public class RoleController {
                 .data(roleDto)
                 .build());
     }
-    @PreAuthorize("hasAnyAuthority(\"ROLE_HR\", \"ROLE_TEAMLEAD\", \"ROLE_EMPLOYEE\")")
+  // @PreAuthorize("hasAnyAuthority(\"ROLE_HR\", \"ROLE_TEAMLEAD\", \"ROLE_EMPLOYEE\")")
     @GetMapping("/{id}")
     public ResponseEntity<GeneralResponse<RoleDto>> getRoleById(
             @RequestParam UUID id
@@ -44,7 +44,7 @@ public class RoleController {
                 .data(roleDto)
                 .build());
     }
-    @PreAuthorize("hasAnyAuthority(\"ROLE_HR\", \"ROLE_TEAMLEAD\", \"ROLE_EMPLOYEE\")")
+   // @PreAuthorize("hasAnyAuthority(\"ROLE_HR\", \"ROLE_TEAMLEAD\", \"ROLE_EMPLOYEE\")")
     @GetMapping("/get-by-name")
     public ResponseEntity<GeneralResponse<RoleDto>> getRoleByName(
             @RequestParam String name
@@ -56,7 +56,7 @@ public class RoleController {
                 .data(roleDto)
                 .build());
     }
-    @PreAuthorize("hasAuthority(\"ROLE_HR\")")
+//    @PreAuthorize("hasAuthority(\"ROLE_HR\")")
     @GetMapping
     public ResponseEntity<GeneralResponse<List<RoleDto>>> getAll(
     ) {

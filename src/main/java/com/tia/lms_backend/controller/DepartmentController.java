@@ -21,7 +21,7 @@ public class DepartmentController {
         this.departmentService = departmentService;
     }
 
-    @PreAuthorize("hasAuthority(\"ROLE_HR\")")
+//    @PreAuthorize("hasAuthority(\"ROLE_HR\")")
     @PostMapping
     public ResponseEntity<GeneralResponse<DepartmentDto>> createDepartment(
             @RequestParam @NotBlank String name,
@@ -34,7 +34,7 @@ public class DepartmentController {
                 .data(departmentDto)
                 .build());
     }
-    @PreAuthorize("hasAnyAuthority(\"ROLE_HR\", \"ROLE_TEAMLEAD\", \"ROLE_EMPLOYEE\")")
+  //  @PreAuthorize("hasAnyAuthority(\"ROLE_HR\", \"ROLE_TEAMLEAD\", \"ROLE_EMPLOYEE\")")
     @GetMapping("/{id}")
     public ResponseEntity<GeneralResponse<DepartmentDto>> getDepartmentById(
             @PathVariable UUID id
@@ -46,7 +46,7 @@ public class DepartmentController {
                 .data(departmentDto)
                 .build());
     }
-    @PreAuthorize("hasAnyAuthority(\"ROLE_HR\", \"ROLE_TEAMLEAD\", \"ROLE_EMPLOYEE\")")
+  //  @PreAuthorize("hasAnyAuthority(\"ROLE_HR\", \"ROLE_TEAMLEAD\", \"ROLE_EMPLOYEE\")")
     @GetMapping("/get-by-name")
     public ResponseEntity<GeneralResponse<DepartmentDto>> getDepartmentByName(
             @RequestParam String name
@@ -58,7 +58,7 @@ public class DepartmentController {
                 .data(departmentDto)
                 .build());
     }
-    @PreAuthorize("hasAnyAuthority(\"ROLE_HR\", \"ROLE_TEAMLEAD\", \"ROLE_EMPLOYEE\")")
+//    @PreAuthorize("hasAnyAuthority(\"ROLE_HR\", \"ROLE_TEAMLEAD\", \"ROLE_EMPLOYEE\")")
     @GetMapping
     public ResponseEntity<GeneralResponse<List<DepartmentDto>>> getAll() {
         List<DepartmentDto> departmentDtos = this.departmentService.getAll();

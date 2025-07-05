@@ -61,10 +61,11 @@ public class EmployeeService {
 
         User user = buildUser(request, department, role, team);
 
+        user.setAvatarUrl(uploadProfilePicture(user.getTckn(), request));
+
         String keycloakId = keycloakService.createKeycloakUser(user.getTckn(), user.getEmail(), null);
         user.setKeycloakId(keycloakId);
 
-        user.setAvatarUrl(uploadProfilePicture(user.getTckn(), request));
 
         User savedUser = saveEntity(user);
 
@@ -138,7 +139,15 @@ public class EmployeeService {
     }
 
     private String uploadProfilePicture(String tckn, CreateEmployeeRequest request) {
-        return awsS3Service.uploadProfilePicture(tckn, request.getProfilePicture());
+        if(request.getProfilePicture() == null) {
+            log.warn("No profile picture provided for TCKN: {}", tckn);
+            return "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png";
+        }
+        else {
+            log.info("Uploading profile picture for TCKN: {}", tckn);
+            return awsS3Service.uploadProfilePicture(tckn, request.getProfilePicture());
+
+        }
     }
 
     private User buildUser(CreateEmployeeRequest request, Department department, Role role, Team team) {

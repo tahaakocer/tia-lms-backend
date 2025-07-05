@@ -73,6 +73,8 @@ aws:
       name: ${AWS_S3_BUCKET_NAME}
 server:
   port: 9999
+  tomcat:
+    max-parameter-count: 10000
 logging:
   level:
     com.keycloak: DEBUG

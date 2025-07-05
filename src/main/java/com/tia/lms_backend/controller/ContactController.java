@@ -22,7 +22,7 @@ public class ContactController {
         this.contactService = contactService;
     }
 
-    @PreAuthorize("hasAnyAuthority(\"ROLE_HR\", \"ROLE_TEAMLEAD\", \"ROLE_EMPLOYEE\")")
+  //  @PreAuthorize("hasAnyAuthority(\"ROLE_HR\", \"ROLE_TEAMLEAD\", \"ROLE_EMPLOYEE\")")
     @PostMapping
     public ResponseEntity<GeneralResponse<ContactDto>> createContact(
             @RequestBody CreateContactRequest createContactRequest
@@ -34,7 +34,7 @@ public class ContactController {
                 .data(contactDto)
                 .build());
     }
-    @PreAuthorize("hasAnyAuthority(\"ROLE_HR\", \"ROLE_TEAMLEAD\", \"ROLE_EMPLOYEE\")")
+//@PreAuthorize("hasAnyAuthority(\"ROLE_HR\", \"ROLE_TEAMLEAD\", \"ROLE_EMPLOYEE\")")
     @GetMapping("/{id}")
     public ResponseEntity<GeneralResponse<ContactDto>> getContactById(@PathVariable UUID id) {
         ContactDto contactDto = contactService.getById(id);
@@ -44,7 +44,7 @@ public class ContactController {
                 .data(contactDto)
                 .build());
     }
-    @PreAuthorize("hasAnyAuthority(\"ROLE_HR\", \"ROLE_TEAMLEAD\", \"ROLE_EMPLOYEE\")")
+//    @PreAuthorize("hasAnyAuthority(\"ROLE_HR\", \"ROLE_TEAMLEAD\", \"ROLE_EMPLOYEE\")")
     @GetMapping
     public ResponseEntity<GeneralResponse<List<ContactDto>>> getAll() {
         List<ContactDto> contacts = contactService.getAll();
@@ -54,7 +54,7 @@ public class ContactController {
                 .data(contacts)
                 .build());
     }
-    @PreAuthorize("hasAuthority(\"ROLE_HR\")")
+//    @PreAuthorize("hasAuthority(\"ROLE_HR\")")
     @DeleteMapping("/{id}")
     public ResponseEntity<GeneralResponse<Void>> deleteContact(@PathVariable UUID id) {
         contactService.delete(id);
@@ -63,7 +63,7 @@ public class ContactController {
                 .message("Contact deleted successfully.")
                 .build());
     }
-    @PreAuthorize("hasAuthority(\"ROLE_HR\")")
+ //   @PreAuthorize("hasAuthority(\"ROLE_HR\")")
     @PutMapping("/{id}/status")
     public ResponseEntity<GeneralResponse<ContactDto>> updateStatus(
             @PathVariable UUID id,

@@ -22,7 +22,7 @@ public class TeamController {
         this.teamService = teamService;
     }
 
-    @PreAuthorize("hasAuthority(\"ROLE_HR\")")
+//    @PreAuthorize("hasAuthority(\"ROLE_HR\")")
     @PostMapping
     public ResponseEntity<GeneralResponse<TeamDto>> createTeam(
             @RequestParam String name, @RequestParam String leadId
@@ -36,7 +36,7 @@ public class TeamController {
         return ResponseEntity.status(201).body(response);
 
     }
-    @PreAuthorize("hasAnyAuthority(\"ROLE_HR\", \"ROLE_TEAMLEAD\", \"ROLE_EMPLOYEE\")")
+ //   @PreAuthorize("hasAnyAuthority(\"ROLE_HR\", \"ROLE_TEAMLEAD\", \"ROLE_EMPLOYEE\")")
     @GetMapping("/{id}")
     public ResponseEntity<GeneralResponse<TeamDto>> getTeamById(@PathVariable String id) {
         TeamDto teamDto = teamService.getById(UUID.fromString(id));
@@ -47,7 +47,7 @@ public class TeamController {
                 .build();
         return ResponseEntity.ok(response);
     }
-    @PreAuthorize("hasAnyAuthority(\"ROLE_HR\", \"ROLE_TEAMLEAD\", \"ROLE_EMPLOYEE\")")
+ //   @PreAuthorize("hasAnyAuthority(\"ROLE_HR\", \"ROLE_TEAMLEAD\", \"ROLE_EMPLOYEE\")")
     @GetMapping("/get-by-name")
     public ResponseEntity<GeneralResponse<TeamDto>> getTeamByName(@RequestParam String name) {
         TeamDto teamDto = teamService.getByName(name);
@@ -58,7 +58,7 @@ public class TeamController {
                 .build();
         return ResponseEntity.ok(response);
     }
-    @PreAuthorize("hasAnyAuthority(\"ROLE_HR\", \"ROLE_TEAMLEAD\", \"ROLE_EMPLOYEE\")")
+//    @PreAuthorize("hasAnyAuthority(\"ROLE_HR\", \"ROLE_TEAMLEAD\", \"ROLE_EMPLOYEE\")")
     @GetMapping("/{id}/with-members")
     public ResponseEntity<GeneralResponse<TeamWithMembersDto>> getTeamWithMembersById(@PathVariable String id) {
         TeamWithMembersDto dto = teamService.getTeamWithMembersById(UUID.fromString(id));
@@ -70,7 +70,7 @@ public class TeamController {
                         .build()
         );
     }
-    @PreAuthorize("hasAnyAuthority(\"ROLE_HR\", \"ROLE_TEAMLEAD\", \"ROLE_EMPLOYEE\")")
+ //   @PreAuthorize("hasAnyAuthority(\"ROLE_HR\", \"ROLE_TEAMLEAD\", \"ROLE_EMPLOYEE\")")
     @GetMapping("/get-by-name/with-members")
     public ResponseEntity<GeneralResponse<TeamWithMembersDto>> getTeamWithMembersByName(@RequestParam String name) {
         TeamWithMembersDto dto = teamService.getTeamWithMembersByName(name);
@@ -82,7 +82,7 @@ public class TeamController {
                         .build()
         );
     }
-    @PreAuthorize("hasAnyAuthority(\"ROLE_HR\", \"ROLE_TEAMLEAD\", \"ROLE_EMPLOYEE\")")
+ //   @PreAuthorize("hasAnyAuthority(\"ROLE_HR\", \"ROLE_TEAMLEAD\", \"ROLE_EMPLOYEE\")")
     @GetMapping("/get-by-lead")
     public ResponseEntity<GeneralResponse<TeamDto>> getTeamByLead(@RequestParam String leadId) {
         TeamDto teamDto = teamService.getByLead(leadId);
@@ -93,7 +93,7 @@ public class TeamController {
                 .build();
         return ResponseEntity.ok(response);
     }
-    @PreAuthorize("hasAnyAuthority(\"ROLE_HR\", \"ROLE_TEAMLEAD\", \"ROLE_EMPLOYEE\")")
+ //   @PreAuthorize("hasAnyAuthority(\"ROLE_HR\", \"ROLE_TEAMLEAD\", \"ROLE_EMPLOYEE\")")
     @GetMapping
     public ResponseEntity<GeneralResponse<List<Team>>> getAllTeams() {
         List<Team> teams = teamService.getAll();
