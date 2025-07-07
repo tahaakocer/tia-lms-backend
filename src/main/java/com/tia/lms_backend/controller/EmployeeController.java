@@ -109,5 +109,29 @@ public class EmployeeController {
                 .data(updatedUser)
                 .build());
     }
+    // @PreAuthorize("hasAuthority(\"ROLE_HR\")")
+    @PutMapping("/{id}")
+    public ResponseEntity<GeneralResponse<UserDto>> updateEmployee(
+            @PathVariable UUID id,
+            @ModelAttribute CreateEmployeeRequest request
+    ) {
+        UserDto updatedUser = employeeService.updateEmployee(id, request);
+        return ResponseEntity.ok(GeneralResponse.<UserDto>builder()
+                .code(200)
+                .message("Employee updated successfully.")
+                .data(updatedUser)
+                .build());
+    }
+
+    // @PreAuthorize("hasAuthority(\"ROLE_HR\")")
+    @DeleteMapping("/{id}")
+    public ResponseEntity<GeneralResponse<Void>> deleteEmployee(@PathVariable UUID id) {
+        employeeService.deleteEmployee(id);
+        return ResponseEntity.ok(GeneralResponse.<Void>builder()
+                .code(204)
+                .message("Employee deleted successfully.")
+                .build());
+    }
+
 
 }

@@ -305,4 +305,52 @@ public class EmployeeService {
                 .orElseThrow(() -> new EntityNotFoundException("User not found with TCKN: " + tckn));
         return userMapper.entityToDto(user);
     }
+    public UserDto updateEmployee(UUID userId, CreateEmployeeRequest request) {
+        log.info("Updating employee with id: {} and request: {}", userId, request);
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
+
+        if (request.getName() != null) user.setName(request.getName());
+        if (request.getLastName() != null) user.setLastName(request.getLastName());
+        if (request.getEmail() != null) user.setEmail(request.getEmail());
+        if (request.getEducation() != null) user.setEducation(request.getEducation());
+        if (request.getTitle() != null) user.setTitle(request.getTitle());
+
+        if (request.getDepartmentId() != null) {
+            Department department = departmentRepository.findById(UUID.fromString(request.getDepartmentId()))
+                    .orElseThrow(() -> new EntityNotFoundException("Department not found with id: " + request.getDepartmentId()));
+            user.setDepartment(department);
+        }
+
+        if (request.getTeamId() != null) {
+            Team team = teamRepository.findById(UUID.fromString(request.getTeamId()))
+                    .orElseThrow(() -> new EntityNotFoundException("Team not found with id: " + request.getTeamId()));
+            user.setTeam(team);
+        }
+
+        if (request.getProfilePicture() != null) {
+            String uploadedUrl = awsS3Service.uploadProfilePicture(user.getTckn(), request.getProfilePicture());
+            user.setAvatarUrl(uploadedUrl);
+        }
+
+
+        User updatedUser = saveEntity(user);
+        log.info("Employee updated successfully: {}", updatedUser);
+
+        return userMapper.entityToDto(updatedUser);
+    }
+
+    public void deleteEmployee(UUID userId) {
+        log.info("Deleting employee with id: {}", userId);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
+
+        // Keycloak kullanıcısını sil
+        keycloakService.deleteKeycloakUser(user.getKeycloakId());
+
+        // Kullanıcıyı veritabanından sil
+        userRepository.delete(user);
+        log.info("Employee deleted successfully: {}", user);
+    }
 }

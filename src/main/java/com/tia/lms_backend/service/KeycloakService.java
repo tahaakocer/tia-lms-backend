@@ -180,4 +180,17 @@ public class KeycloakService {
     }
 
 
+    public void deleteKeycloakUser(String keycloakId) {
+        log.info("Deleting Keycloak user with ID: {}", keycloakId);
+        RealmResource realmResource = this.keycloakClient.realm(realm);
+        UsersResource usersResource = realmResource.users();
+
+        try {
+            usersResource.delete(keycloakId);
+            log.info("User with ID {} deleted successfully", keycloakId);
+        } catch (Exception e) {
+            log.error("Failed to delete user with ID {}: {}", keycloakId, e.getMessage());
+            throw new GeneralException("Failed to delete Keycloak user: " + e.getMessage(), e);
+        }
+    }
 }
