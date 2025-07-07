@@ -1,6 +1,7 @@
 package com.tia.lms_backend.controller;
 
 import com.tia.lms_backend.dto.ContactDto;
+import com.tia.lms_backend.dto.request.ContactStatusRequest;
 import com.tia.lms_backend.dto.request.CreateContactRequest;
 import com.tia.lms_backend.dto.response.GeneralResponse;
 import com.tia.lms_backend.model.enums.ContactPriority;
@@ -44,6 +45,16 @@ public class ContactController {
                 .data(contactDto)
                 .build());
     }
+    @GetMapping("/get-by-user-id")
+    public ResponseEntity<GeneralResponse<List<ContactDto>>> getContactsByUserId(@RequestParam UUID userId) {
+        List<ContactDto> contacts = contactService.getByUserId(userId);
+        return ResponseEntity.ok(GeneralResponse.<List<ContactDto>>builder()
+                .code(200)
+                .message("Contacts retrieved successfully.")
+                .data(contacts)
+                .build());
+    }
+
 //    @PreAuthorize("hasAnyAuthority(\"ROLE_HR\", \"ROLE_TEAMLEAD\", \"ROLE_EMPLOYEE\")")
     @GetMapping
     public ResponseEntity<GeneralResponse<List<ContactDto>>> getAll() {
@@ -67,13 +78,14 @@ public class ContactController {
     @PutMapping("/{id}/status")
     public ResponseEntity<GeneralResponse<ContactDto>> updateStatus(
             @PathVariable UUID id,
-            @RequestParam ContactStatus status
-    ) {
-        ContactDto updated = contactService.updateStatus(id, status);
+            @RequestBody ContactStatusRequest request
+            ) {
+        ContactDto updated = contactService.updateStatus(id,request);
         return ResponseEntity.ok(GeneralResponse.<ContactDto>builder()
                 .code(200)
                 .message("Contact status updated successfully.")
                 .data(updated)
                 .build());
     }
+
 }

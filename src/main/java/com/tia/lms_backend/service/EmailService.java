@@ -52,18 +52,18 @@ public class EmailService {
         sendEmail(to, subject, body);
     }
     @Async
-    public void sendContactResponseEmail(String to, String userName, String courseName, String status) {
+    public void sendContactResponseEmail(String to, String userName, String courseName, String status,String note) {
         String subject = "Kurs Talebinizin Sonucu";
         String body = """
             Merhabalar %s,
 
             "%s" başlıklı kurs talebiniz %s.
-
+            IK notu: %s
             İyi çalışmalar dileriz.
 
             Saygılarımızla,
             PIA HR Ekibi
-            """.formatted(userName,courseName, status.equals("ACCEPTED") ? "onaylandı" : "reddedildi");
+            """.formatted(userName,courseName, status.equals("ACCEPTED") ? "onaylandı" : "reddedildi",note);
 
         sendEmail(to, subject, body);
     }
