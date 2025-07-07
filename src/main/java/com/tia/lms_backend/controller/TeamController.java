@@ -84,9 +84,9 @@ public class TeamController {
     }
  //   @PreAuthorize("hasAnyAuthority(\"ROLE_HR\", \"ROLE_TEAMLEAD\", \"ROLE_EMPLOYEE\")")
     @GetMapping("/get-by-lead")
-    public ResponseEntity<GeneralResponse<TeamDto>> getTeamByLead(@RequestParam String leadId) {
-        TeamDto teamDto = teamService.getByLead(leadId);
-        GeneralResponse<TeamDto> response = GeneralResponse.<TeamDto>builder()
+    public ResponseEntity<GeneralResponse<TeamWithMembersDto>> getTeamByLead(@RequestParam String leadId) {
+        TeamWithMembersDto teamDto = teamService.getByLead(leadId);
+        GeneralResponse<TeamWithMembersDto> response = GeneralResponse.<TeamWithMembersDto>builder()
                 .code(200)
                 .message("Team fetched successfully")
                 .data(teamDto)

@@ -117,12 +117,23 @@ public class TeamService {
         }
     }
 
-    public TeamDto getByLead(String leadId) {
-    log.info("Fetching team by leadId: {}", leadId);
+    public TeamWithMembersDto getByLead(String leadId) {
+        log.info("Fetching team with members by leadId: {}", leadId);
+
         Team team = teamRepository.findByLeadId(UUID.fromString(leadId))
                 .orElseThrow(() -> new EntityNotFoundException("Team not found with leadId: " + leadId));
-        log.info("Team fetched successfully: {}", team);
-        return teamMapper.entityToDto(team);
+
+        List<User> members = userRepository.findAllByTeam(team);
+        List<UserDto> memberDtos = members.stream()
+                .map(this.userMapper::entityToDto)
+                .toList();
+
+        return TeamWithMembersDto.builder()
+                .id(team.getId())
+                .name(team.getName())
+                .leadId(team.getLeadId())
+                .members(memberDtos)
+                .build();
     }
 
     public List<Team> getAll() {
